@@ -1,14 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .database import create_db_and_tables, SessionDep
+from .database import create_db_and_tables, SessionDep, seed_data
 from .models import Category
-from .routers import router
+from .routers import categories_router, books_router
 from .admin import admin_manager
 
 
 tags_metadata = [
     {"name": "categories", "description": "Categories operations"},
+    {"name": "books", "description": "Books operations"},
 ]
 
 app = FastAPI(
@@ -42,11 +43,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router)
-
-@app.on_event("startup")
-def on_startup():
-    create_db_and_tables()
-
+app.include_router(categories_router)
+app.include_router(books_router)
 
 admin_manager.mount_to(app)
+
+
+def main():
+    create_db_and_tables()
+    seed_data()
+
+
+if __name__ == "__main__":
+    main()
